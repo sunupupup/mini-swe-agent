@@ -23,9 +23,11 @@ class LocalEnvironment:
 
     def execute(self, action: dict, cwd: str = "", *, timeout: int | None = None) -> dict[str, Any]:
         """Execute a command in the local environment and return the result as a dict."""
+        # action 来自 Agent 的模型回复，例如 {"command": "ls"}；取出实际要执行的 Bash 命令。
         command = action.get("command", "")
         cwd = cwd or self.config.cwd or os.getcwd()
         try:
+            # _run() 会启动操作系统子进程，阻塞等待命令结束，并收集 stdout/退出码。
             result = _run(command, cwd, os.environ | self.config.env, timeout or self.config.timeout)
             output = {"output": result.stdout, "returncode": result.returncode, "exception_info": ""}
         except Exception as e:
@@ -71,6 +73,7 @@ class LocalEnvironment:
 
 def _run(command: str, cwd: str, env: dict[str, str], timeout: int) -> subprocess.CompletedProcess[str]:
     """Like subprocess.run, but kills the whole process group on timeout so no children are orphaned."""
+    # 真正交给操作系统执行命令的位置；shell=True 表示由 shell 解释 command 字符串。
     process = subprocess.Popen(
         command,
         shell=True,

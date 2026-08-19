@@ -8,6 +8,8 @@ from jinja2 import StrictUndefined, Template
 from minisweagent.exceptions import FormatError
 from minisweagent.models.utils.openai_multimodal import expand_multimodal_content
 
+# 发给支持原生 Tool Calling 的模型的工具 Schema：它约定 bash 工具必须接收一个名为 command 的字符串参数。
+# 因而模型若调用 bash，应返回类似 {"command": "ls"} 的 arguments；后续解析器再将其统一为内部 action。
 BASH_TOOL = {
     "type": "function",
     "function": {
